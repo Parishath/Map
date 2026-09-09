@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  map_api:
+    build: .
+    container_name: map_microservice
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      - NODE_ENV=production
+      - PORT=8085
+      - REDIS_HOST=redis_cache
+      - REDIS_PORT=6379
+      - MONGO_URI=mongodb://mongo_db:27017/map_tracker
+      - JWT_SECRET=your_jwt_secret_here
+    depends_on:
+      - redis_cache
+      - mongo_db
+    mem_limit: 250m
+    cpus: "0.5"
+
+  redis_cache:
+    image: redis:7-alpine
+    container_name: map_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    mem_limit: 100m
+
+  mongo_db:
+    image: mongo:6
+    container_name: map_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    mem_limit: 500m
+
+volumes:
+  mongo_data:
