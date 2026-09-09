@@ -12,11 +12,15 @@ services:
       - PORT=8085
       - REDIS_HOST=redis_cache
       - REDIS_PORT=6379
-      - MONGO_URI=mongodb://mongo_db:27017/map_tracker
+      - DB_HOST=mysql_db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASS=rootpassword
+      - DB_NAME=map_tracker
       - JWT_SECRET=your_jwt_secret_here
     depends_on:
       - redis_cache
-      - mongo_db
+      - mysql_db
     mem_limit: 250m
     cpus: "0.5"
 
@@ -28,15 +32,18 @@ services:
       - "6379:6379"
     mem_limit: 100m
 
-  mongo_db:
-    image: mongo:6
-    container_name: map_mongo
+  mysql_db:
+    image: mysql:8.0
+    container_name: map_mysql
     restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: map_tracker
     ports:
-      - "27017:27017"
+      - "3307:3306"
     volumes:
-      - mongo_data:/data/db
+      - mysql_data:/var/lib/mysql
     mem_limit: 500m
 
 volumes:
-  mongo_data:
+  mysql_data:

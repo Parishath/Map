@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
 const { createClient } = require('redis');
 
 const app = express();
@@ -17,16 +17,28 @@ const redisClient = createClient({
 });
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
-// MongoDB setup
+// MySQL (Sequelize) setup
+const sequelize = new Sequelize(
+    process.env.DB_NAME || 'map_tracker',
+    process.env.DB_USER || 'root',
+    process.env.DB_PASS || 'rootpassword',
+    {
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || 3306,
+        dialect: 'mysql',
+        logging: false, // Set to true to see SQL queries in console
+    }
+);
+
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/map_tracker', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        console.log('MongoDB connected successfully');
+        await sequelize.authenticate();
+        console.log('MySQL connected successfully via Sequelize');
+        
+        // Sync models (creates tables if they don't exist)
+        // await sequelize.sync(); 
     } catch (error) {
-        console.error('MongoDB connection error:', error);
+        console.error('MySQL connection error:', error);
     }
 };
 
